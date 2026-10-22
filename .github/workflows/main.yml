@@ -32,11 +32,23 @@ jobs:
       - name: Verify classification results
         shell: pwsh
         run: |
-          $inputs = @(Get-Content cinta1.txt, cinta2.txt | Where-Object { $_ -match '\S' })
-          $outputs = @(Get-Content ContA.txt, ContB.txt, ContC.txt | Where-Object { $_ -match '\S' })
+          $cinta1 = @(Get-Content 'cinta1.txt' | Where-Object { $_.Trim() })
+          $cinta2 = @(Get-Content 'cinta2.txt' | Where-Object { $_.Trim() })
+          $a = @(Get-Content 'ContA.txt' | Where-Object { $_.Trim() })
+          $b = @(Get-Content 'ContB.txt' | Where-Object { $_.Trim() })
+          $c = @(Get-Content 'ContC.txt' | Where-Object { $_.Trim() })
 
-          if ($inputs.Count -ne 28 -or $outputs.Count -ne $inputs.Count) {
-            throw "Classification test failed: unexpected number of pieces."
+          $entradas = $cinta1.Count + $cinta2.Count
+          $salidas = $a.Count + $b.Count + $c.Count
+
+          Write-Host "Piezas de entrada: $entradas"
+          Write-Host "Contenedor A: $($a.Count)"
+          Write-Host "Contenedor B: $($b.Count)"
+          Write-Host "Contenedor C: $($c.Count)"
+          Write-Host "Piezas de salida: $salidas"
+
+          if ($entradas -ne 28 -or $salidas -ne $entradas) {
+            throw "Error: las entradas y salidas no coinciden."
           }
 
-          Write-Host "Test passed: 28 pieces processed."
+          Write-Host "Prueba superada: 28 piezas clasificadas."
