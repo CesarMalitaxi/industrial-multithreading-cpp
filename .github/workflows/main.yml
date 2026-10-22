@@ -1,0 +1,42 @@
+
+name: Windows C++ Build and Test
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: windows-2022
+    timeout-minutes: 10
+
+    steps:
+      - name: Download project files
+        uses: actions/checkout@v4
+
+      - name: Configure MSVC compiler
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Compile C++ program
+        shell: cmd
+        run: cl /nologo /EHsc /std:c++17 /Fe:industrial_sorting.exe industrial_sorting.cpp
+
+      - name: Run industrial simulation
+        shell: pwsh
+        run: |
+          .\industrial_sorting.exe
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
+      - name: Verify classification results
+        shell: pwsh
+        run: |
+          $inputs = @(Get-Content cinta1.txt, cinta2.txt | Where-Object { $_ -match '\S' })
+          $outputs = @(Get-Content ContA.txt, ContB.txt, ContC.txt | Where-Object { $_ -match '\S' })
+
+          if ($inputs.Count -ne 28 -or $outputs.Count -ne $inputs.Count) {
+            throw "Classification test failed: unexpected number of pieces."
+          }
+
+          Write-Host "Test passed: 28 pieces processed."
